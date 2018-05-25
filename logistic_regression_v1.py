@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-#import time
 
 
 def logistic_regression(train_data, train_labels):
@@ -42,18 +41,13 @@ def classification_accuracy(pred_labels, actual_labels):
 
 
 def main():
-  # Load data and labels, and split data into 80/20 for training and testing
   #data   = np.genfromtxt('pro_team_composition.csv', delimiter=',', skip_header=1, usecols=(range(10)))
   #labels = np.genfromtxt('pro_team_composition.csv', delimiter=',', dtype=str, skip_header=1, usecols=(10))
   
-  # TODO: fix the labeling so we get 0's and 1's
-  data   = np.genfromtxt('data_after_clustering.csv', delimiter=',', skip_header=1, usecols=(range(10)))
-  labels = np.genfromtxt('data_after_clustering.csv', delimiter=',', dtype=str, skip_header=1, usecols=(10))
-  labels = [int(labels[x] == 'TRUE') for x in range(len(labels))]
-   
-  print(labels)
-  
-  
+  # Load data and labels, and split data into 80/20 for training and testing
+  data   = np.genfromtxt('data_after_clustering.csv', delimiter=',', usecols=(range(10)))
+  labels = np.genfromtxt('data_after_clustering.csv', delimiter=',', dtype=str, usecols=(10))  
+
   train_data, test_data     = train_test_split(data, test_size=0.2)
   train_labels, test_labels = train_test_split(labels, test_size=0.2)
   
@@ -62,10 +56,6 @@ def main():
   
   accuracy = classification_accuracy(predicted_labels, test_labels)
   print(accuracy)
-  
-  
-  
-  
   
   
 main()
