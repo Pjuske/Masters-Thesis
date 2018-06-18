@@ -6,10 +6,10 @@ import csv
 
 def main():
   
-  iterations = 500
+  iterations = 2000
   less_than_match_id = None
   
-  with open("./%s" % ('match_ids_for_latest_matches2.csv'), 'w', newline='') as outf:
+  with open("./%s" % ('match_ids_for_latest_matches.csv'), 'w', newline='') as outf:
     dw = csv.DictWriter(outf, dict.fromkeys(['match_id']).keys())
     dw.writeheader()
     
@@ -18,7 +18,7 @@ def main():
       # See https://www.opendota.com/api-keys
       if (i % 50 == 0 and i != 0):
         print(str(i) + '/' + str(iterations) + ' iterations done...\n')
-        time.sleep(100)
+        time.sleep(75)
   
       # Get list of randomly sampled public matches
       if (i == 0):
@@ -30,11 +30,11 @@ def main():
       less_than_match_id = data[-1]['match_id']
       
       for row in data:    
-        # Select 'Ranked' as lobby type and 'Normal/Captains Mode' as game mode
-        if row['lobby_type']==7 and (row['game_mode']==2 or row['game_mode']==22):
-          match_id = json.loads('{"match_id": ' + str(row['match_id']) + '}')          
-          dw.writerow(match_id)
-
+        # Select 'Ranked' as lobby type and 'Normal/Captains Mode' as game mode in high skilled games
+        if (row['avg_mmr'] != None and row['avg_mmr'] >= 3400):
+          if row['lobby_type']==7 and (row['game_mode']==2 or row['game_mode']==22):
+            match_id = json.loads('{"match_id": ' + str(row['match_id']) + '}')          
+            dw.writerow(match_id)
 
 
 main()
