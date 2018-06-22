@@ -6,7 +6,7 @@ import csv
 
 def main():
   
-  iterations = 2000
+  iterations = 2500
   less_than_match_id = None
   
   with open("./%s" % ('match_ids_for_latest_matches.csv'), 'w', newline='') as outf:
@@ -18,7 +18,7 @@ def main():
       # See https://www.opendota.com/api-keys
       if (i % 50 == 0 and i != 0):
         print(str(i) + '/' + str(iterations) + ' iterations done...\n')
-        time.sleep(75)
+        time.sleep(80)
   
       # Get list of randomly sampled public matches
       if (i == 0):

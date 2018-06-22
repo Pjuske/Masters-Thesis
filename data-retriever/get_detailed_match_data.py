@@ -9,14 +9,14 @@ features        = ['radiant_win','duration','skill',
                    'radiant_score','dire_score',
                    'barracks_status_radiant','barracks_status_dire',
                    'tower_status_radiant','tower_status_dire',
-                   'radiant_gold_adv','radiant_xp_adv',
-                   'patch','region']
+                   'radiant_gold_adv','radiant_xp_adv']
 
 players         = ['player0','player1','player2','player3','player4',
                    'player5','player6','player7','player8','player9']
 
 player_features = ['player_slot','hero_id','kills','deaths','assists','hero_healing',
-                   'last_hits','gold_per_min','xp_per_min','tower_damage','hero_damage']
+                   'last_hits','gold_per_min','xp_per_min','tower_damage','hero_damage',
+                   'obs_placed','sen_placed']
 
 
 
@@ -36,7 +36,7 @@ def format_player_data(players_data, features):
 
 def main():
   # Load file containing match ids that we want detailed match data for
-  filename = 'match_ids_for_latest_matches.csv'
+  filename = 'match_ids_for_latest_matches_v5.csv'
   data = np.genfromtxt(filename, dtype=np.dtype('i8'), skip_header=1)
   
   with open("./%s" % ('detailed_match_data.csv'), 'w', newline='',  encoding="utf-8") as outf:
@@ -67,6 +67,7 @@ def main():
       for i in range(len(player_data)):
         feature = players[i]
         my_dict[feature] = player_data[i]
+      
       
       dw.writerow(my_dict)
     
