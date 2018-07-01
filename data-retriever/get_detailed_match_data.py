@@ -5,7 +5,7 @@ import json
 import csv
 
 
-features        = ['radiant_win','duration','skill',
+features        = ['radiant_win','match_id','duration','skill',
                    'radiant_score','dire_score',
                    'barracks_status_radiant','barracks_status_dire',
                    'tower_status_radiant','tower_status_dire',
@@ -37,7 +37,7 @@ def format_player_data(players_data, features):
 def main():
   # Load file containing match ids that we want detailed match data for
   filename = 'match_ids_for_latest_matches_v5.csv'
-  data = np.genfromtxt(filename, dtype=np.dtype('i8'), skip_header=1)
+  data = np.genfromtxt(filename, dtype=np.dtype('i8'), skip_header=1)  
   
   with open("./%s" % ('detailed_match_data.csv'), 'w', newline='',  encoding="utf-8") as outf:
     # Write header into csv file    
@@ -48,13 +48,17 @@ def main():
     for i in range(len(data)):
       # Avoid exceeding the rate limit of 60 calls per minute
       # See https://www.opendota.com/api-keys
-      if (i % 50 == 0 and i != 0):
-        print(str(i) + '/' + str(i) + ' iterations done...\n')
-        time.sleep(70)
+      if (i % 290 == 0):
+        print(str(i) + ' iterations done...\n')
+        time.sleep(60)
       
       # Get detailed match data
       match_id = data[i]
-      url = "https://api.opendota.com/api/matches/" + str(match_id)
+      print(match_id)
+      
+      api_key = '99285478-04bd-43fa-b9a0-0a1437d6ff96'
+      url     = "https://api.opendota.com/api/matches/" + str(match_id) + '?api_key=' + api_key
+      
       detailed_data = json.loads(urllib.request.urlopen(url).read())
 
       # Build a json object consisting of the wanted features
@@ -68,7 +72,6 @@ def main():
         feature = players[i]
         my_dict[feature] = player_data[i]
       
-      
       dw.writerow(my_dict)
-    
+      
 main()
