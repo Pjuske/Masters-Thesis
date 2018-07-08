@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial.distance import pdist
 from sklearn import preprocessing
 from matplotlib import pyplot as plt
-from scipy.cluster.hierarchy import dendrogram, linkage, cut_tree
+from scipy.cluster.hierarchy import cut_tree
 from hierarchical_clustering import hierarchical_clustering
 
 
@@ -24,12 +24,12 @@ def compute_Dr_and_Wk(clusters, data):
     indices = np.where(clusters == label)[0]
     cluster_data.append(np.take(data, indices, axis=0))  
   
-  # Compute sum of pairwise distances for all samples in each respective cluster
+  # Compute sum of pairwise distances for all samples in each respective cluster, D_r
   pairwise_dist_sum = []
   for cluster in cluster_data:
-    pairwise_dist_sum.append(np.sum(pdist(cluster, 'sqeuclidean')))
+    pairwise_dist_sum.append(np.sum(pdist(cluster, 'euclidean')))
   
-  # Compute the pooled within-cluster sum of squares around the cluster means, W_k
+  # Compute the pooled within-cluster sum around the cluster means, W_k
   W_k = 0
   for k in range(len(cluster_data)):
     D_r = pairwise_dist_sum[k]
@@ -54,90 +54,82 @@ def gap_k(k, B, data):
   datasets = generate_B_sets(B, n_samples, ranges)
   
   # Calculate log(W_kb) for each dataset and get the expectation
-  acc = 0
+  log_Wkb_list = []
   for b in range(B):
     clusters = cut_tree(hierarchical_clustering(datasets[b], 'ward', 'euclidean'), n_clusters=[k])
-    acc += math.log(compute_Dr_and_Wk(clusters, datasets[b]))
+    log_Wkb_list.append(math.log(compute_Dr_and_Wk(clusters, datasets[b])))
  
-  return log_Wk, acc/B
+  return log_Wk, log_Wkb_list
 
-  # Compute the estimated gap statistic
-  #gap_k = (acc / B) - log_Wk
-  #return gap_k
-
-
-def monte_carlo_test(B, n_samples, data):
-  # Compute min and max range for each feature
-  n_samples  = data.shape[0]
-  n_features = data.shape[1]
-  ranges = [[np.min(data[:,x]) for x in range(n_features)],
-            [np.max(data[:,x]) for x in range(n_features)]]
   
-  # Generate B Monte Carlo datasets drawn from our reference distribution
-  datasets = generate_B_sets(B, n_samples, ranges)
-  mc_B = []
-  for i in range(1,n_samples):
-    # Calculate log(W_kb) for each dataset and get the expectation
-    acc = 0
-    for b in range(B):
-      clusters = cut_tree(hierarchical_clustering(datasets[b], 'ward', 'euclidean'), n_clusters=[i])
-      acc += math.log(compute_Dr_and_Wk(clusters, datasets[b]))
-    mc_B.append(acc/B)
-  print("Done with", B ,"Monte carlo test")
+def compute_sk(B, l, log_Wkb_list):
+  # Compute standard deviation sd_k
+  sd_k = np.sqrt(np.sum((np.array(log_Wkb_list) - l)**2)/B)
+  
+  # Compute s_k = sd_k * sqrt(1+(1/B))
+  sk = sd_k * np.sqrt(1+(1/B))
+  
+  return sk
+
+
+def choose_k(k_max, B, gap_list, l_list, log_Wkb_matrix):
+  sk_list = [compute_sk(B, l_list[i], log_Wkb_matrix[i]) for i in range(len(l_list))]
+  
+  diff_list = np.array(gap_list) - np.array(sk_list)
+  
+  # Choose number of clusters as the smallest k where Gap(k) >= Gap(k+1)-s_{k+1}
+  for i in range(len(diff_list)):
+    k = i+1
+    if gap_list[i] < diff_list[i+1]:
+      continue
+    return k
 
 
 def main():
-  hero_ids  = np.genfromtxt('data-retriever/datasets/4_detailed_player_data_mean.csv', delimiter=',', skip_header=1)[:,0]
-  data      = np.genfromtxt('data-retriever/datasets/4_detailed_player_data_mean.csv', delimiter=',', skip_header=1)[:,1:]
+  data      = np.genfromtxt('data-retriever/datasets/4_detailed_player_data_mean.csv', 
+                            delimiter=',', skip_header=1)[:,1:]
   norm_data = preprocessing.scale(data)
+
+  k_max = 10
+  B = 100
+  gap_list       = []
+  log_Wk_list    = []
+  log_Wkb_matrix = []
+  l_list         = []
   
-  #result = hierarchical_clustering(norm_data, 'ward', 'euclidean')
-  
-  
-  #cuttree = cut_tree(result, n_clusters=[3])
-  #sum_of_pairwise_distances(cuttree, norm_data)
-  
-  #print(cuttree)
-  
-  
-  B = [10,25,50,75,100,150,200]
-  test = [monte_carlo_test(B[i], 10, norm_data) for i in range(len(B))]
-  plt.plot(test[0])
-  plt.plot(test[1])
-  plt.plot(test[2])
-  plt.plot(test[3])
-  plt.plot(test[4])
-  plt.plot(test[5])
-  plt.plot(test[6])
-  plt.show()
-  
-  #B = 50 
-  """
-  #gap_k_list = []
-  k_max = 25
-  
-  
-  list1 = []
-  list2 = []
-  for k in range(1,k_max):
-    a,b = gap_k(k, B, data)
-    list1.append(a)
-    list2.append(b)
-    #gap_k_list.append(gap_k(k, B, data))
+  for k in range(k_max):
+    # Compute the estimated gap statistic
+    log_Wk, log_Wkb = gap_k(k+1, B, norm_data)
+    gap = sum(log_Wkb)/B - log_Wk  
     
-  
-  plt.plot(range(1,k_max),list1, color='r')
-  plt.plot(range(1,k_max),list2)
-  plt.title('Plot of expected and observed log(W_k)')
+    # Save W_k, W_kb for each b in B, l, and the gap
+    log_Wk_list.append(log_Wk)
+    log_Wkb_matrix.append(log_Wkb)
+    l_list.append(sum(log_Wkb)/B)
+    gap_list.append(gap)
+    
+    
+  # Plot of expected and observed value of log(W_k)
+  plt.plot(range(1,k_max+1), log_Wk_list, '--bo', label='Observed value', color='green')
+  plt.plot(range(1,k_max+1), l_list, '--bo', label='Expected value', color='orange')
+  plt.title('Plot of expected and observed log(W_k) per k')
+  plt.xticks(np.arange(1,11,1.0))
   plt.xlabel('number of clusters k')
-  plt.ylabel('obs and exp log(W_k)')
+  plt.ylabel('observed and expected log(W_k)')
+  plt.legend()
   plt.show()
-  """
+  
+  # Plot of gap between expected and observed value
+  plt.plot(range(1,k_max+1),gap_list, '--bo')
+  plt.title('Plot of gap between expected and observed log(W_k)')
+  plt.xticks(np.arange(1,11,1.0))
+  plt.xlabel('number of clusters k')
+  plt.ylabel('gap')
+  plt.show()
 
-
+  optimal_k = choose_k(k_max, B, gap_list, l_list, log_Wkb_matrix)
+  print('The optimal number of clusters using gap statistic: ', optimal_k)
 
 
 
 main()
-
-
