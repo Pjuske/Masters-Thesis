@@ -41,9 +41,9 @@ def main():
       count_radiant_roles = [0] * roles
       count_dire_roles    = [0] * roles
    
-      # Create a dictionary
+      # Create a dictionary and add information about who won the game
       my_dict={}
-      my_dict['radiant_win'] = row['radiant_win']
+      my_dict['radiant_win'] = 1 if (row['radiant_win']==True) else 0
       
       
       try:
