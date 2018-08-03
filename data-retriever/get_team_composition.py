@@ -43,7 +43,7 @@ def main():
    
       # Create a dictionary and add information about who won the game
       my_dict={}
-      my_dict['radiant_win'] = 1 if (row['radiant_win']==True) else 0
+      my_dict['radiant_win'] = 1 if (row['radiant_win']=='TRUE') else 0
       
       
       try:
