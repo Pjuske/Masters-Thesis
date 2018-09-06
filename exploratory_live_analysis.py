@@ -13,7 +13,7 @@ def plot3d(data):
   ax.set_ylim(min(data[:,2]),max(data[:,2]))
   ax.set_zlim(min(data[:,3]),max(data[:,3]))
   
-  for i in range(1000): #len(data)):
+  for i in range(1000000): #len(data)):
     radiant_win = int(data[i,0])
     ax.scatter(data[i,1], data[i,2], data[i,3], c=color[radiant_win])
     
@@ -57,10 +57,10 @@ def main():
   """
   color = ['red', 'green']
   for i in range(2):
-    indices = np.where(data[:,0] == i)[0]
-    todo = np.random.choice(indices, size=300)
-    y = Y[todo]
-    #y = Y[indices]    
+    indices = np.where(data[:100000,0] == i)[0]
+    #todo = np.random.choice(indices, size=300)
+    #y = Y[todo]
+    y = Y[indices]    
     plt.scatter(y[:,0], y[:,1], c=color[i])
     
   # Define plot layout
@@ -68,10 +68,34 @@ def main():
   plt.ylabel('Principal Component 2')
   plt.show()
   """
+  
+  
   plot3d(data)
   
   
+  duration = data[:1000000,1]
+  gpm = data[:1000000,2]
+  color = ['red','green']
+  for i in range(2):
+      plt.scatter(duration[np.where(data[:1000000,0] == i)[0]], gpm[np.where(data[:1000000,0] == i)[0]], s=5,facecolors='none',edgecolors=color[i])
+
+  plt.ylabel('Gold advantage')
+  plt.xlabel('Duration')  
+  plt.show()
   
+  
+  """
+  indices = np.where(data[:,1] <= 10)[0]
+  duration = data[indices][:,1]
+  gpm = data[indices][:,2]
+  color = ['red','green']
+  for i in range(2):
+      plt.scatter(duration[np.where(data[:,0] == i)[0]], gpm[np.where(data[:,0] == i)[0]], s=5,facecolors='none',edgecolors=color[i])
+  
+  plt.ylabel('Gold advantage')
+  plt.xlabel('Duration')
+  plt.show()
+  """
   
   
   
