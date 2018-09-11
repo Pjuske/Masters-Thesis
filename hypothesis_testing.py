@@ -57,7 +57,7 @@ def test_hypothesis(radiant_win, gpm, xpm, alpha):
   
 
 def main():
-  data = np.genfromtxt('9_gold_exp_advantage_matrix.csv',delimiter=',',skip_header=1)
+  data = np.genfromtxt('data-retriever/datasets/9_gold_exp_advantage_matrix.csv',delimiter=',',skip_header=1)
   alpha = 0.05
   
   result = []
@@ -94,7 +94,7 @@ plt.plot(gpm_hypotheses, label='gpm p-values', linewidth=3.5, color='#53E53C')
 plt.plot(xpm_hypotheses, label='xpm p-values', linewidth=3.0, color='orange')
 plt.plot([alpha for i in range(len(xpm_hypotheses))], label=('alpha = ' + str(alpha)), color='black')
 plt.scatter(fail_to_reject, fail_to_reject_values, label='Failed to reject hypothesis', color='red')
-plt.title('p-values from hypothesis-testing gpm and xpm values per game-time minute')
+plt.title('p-values from hypothesis-testing gold and exp advantage per minute')
 plt.xticks(np.arange(0,len(result),2.0))
 plt.yticks(np.arange(0,1.1,0.1))
 plt.xlabel('Game minute')
@@ -110,7 +110,7 @@ plt.plot([math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))], labe
 plt.plot([math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))], label='log(xpm p-values)', linewidth=3.0, color='orange')
 plt.plot([math.log(alpha) for i in range(len(xpm_hypotheses))], label=('alpha = log(' + str(alpha) + ')'), color='black')
 plt.scatter(log_fail_to_reject, log_fail_to_reject_values, label='Failed to reject hypothesis', color='red')
-plt.title('log(p-values) from hypothesis-testing gpm and xpm values per game-time minute')
+plt.title('log(p-values) from hypothesis-testing gold and exp advantage per minute')
 plt.xticks(np.arange(0,len(result),2.0))
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 plt.xlabel('Game minute')
