@@ -37,6 +37,7 @@ def best_k(k_array, train_data, train_labels):
   # Plot the accuracies for the different k values
   plt.figure(figsize=(12,7))
   plt.plot(k_array, k_accuracies, '--bo', color='green')
+  plt.rc('axes',titlesize=10)
   plt.xticks(k_array)
   plt.xlabel("k-parameter")
   plt.ylabel("Accuracy score")
