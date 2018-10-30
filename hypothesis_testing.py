@@ -62,14 +62,21 @@ def main():
   
   result = []
   for i in range(int(np.max(data[:,1]))):
-    duration = data[:, 1]
-    winning_team  = data[np.where(duration == i)[0]][:,1]
-    if(len(winning_team)<50):
-        continue
+    duration        = data[:, 1]
+    
+    match_count   = data[np.where(duration == i)[0]][:,0]
+    #winning_team  = data[np.where(duration == i)[0]][:,1]
     gpm_advantage = data[np.where(duration == i)[0]][:,2]
     xpm_advantage = data[np.where(duration == i)[0]][:,3]
     
-    result.append(test_hypothesis(winning_team, gpm_advantage, xpm_advantage, alpha))
+    radiant_matches = list(match_count).count(1)
+    dire_matches    = list(match_count).count(0)
+    
+    # Skip if there are not enough matches
+    if (radiant_matches < 20 or dire_matches < 20):
+        continue
+    
+    result.append(test_hypothesis(match_count, gpm_advantage, xpm_advantage, alpha))
   
   gpm_hypotheses = [result[i][0] for i in range(len(result))]
   xpm_hypotheses = [result[i][1] for i in range(len(result))]
@@ -89,7 +96,9 @@ def minhandler(number):
 fail_to_reject = list(np.where(np.array(gpm_hypotheses) > alpha)[0]) + list(np.where(np.array(xpm_hypotheses) > alpha)[0])
 fail_to_reject_values = [gpm_hypotheses[i] for i in np.where(np.array(gpm_hypotheses) > alpha)[0]] + [xpm_hypotheses[i] for i in np.where(np.array(xpm_hypotheses) > alpha)[0]]
 
-xpm_hypotheses = [minhandler(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))]
+xpm_hypotheses = [minhandler(i) for i in range(len(xpm_hypotheses))]
+gpm_hypotheses = [minhandler(i) for i in range(len(gpm_hypotheses))]
+
 plt.plot(gpm_hypotheses, label='gpm p-values', linewidth=3.5, color='#53E53C')
 plt.plot(xpm_hypotheses, label='xpm p-values', linewidth=3.0, color='orange')
 plt.plot([alpha for i in range(len(xpm_hypotheses))], label=('alpha = ' + str(alpha)), color='black')
@@ -102,6 +111,10 @@ plt.ylabel('p-value')
 plt.legend()
 plt.show()
 
+
+print(gpm_hypotheses)
+print(xpm_hypotheses)
+"""
 log_fail_to_reject = list(np.where(np.array([math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))]) > math.log(alpha))[0]) + list(np.where(np.array([math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))]) > math.log(alpha))[0])
 log_fail_to_reject_values = [[math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))][i] for i in np.where(np.array([math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))]) > math.log(alpha))[0]] + [[math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))][i] for i in np.where(np.array([math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))]) > math.log(alpha))[0]]
 
@@ -117,3 +130,4 @@ plt.xlabel('Game minute')
 plt.ylabel('log(p-value)')
 plt.legend()
 plt.show()
+"""

@@ -41,7 +41,7 @@ def best_k(k_array, train_data, train_labels):
   plt.rc('axes',titlesize=10)
   plt.xticks(k_array)
   plt.xlabel("k-parameter")
-  plt.ylabel("Accuracy score")
+  plt.ylabel("Accuracy score (%)")
   plt.title("Accuracy score for different kNN-classifiers")
   plt.show()
   
@@ -89,6 +89,10 @@ def main():
   trainX, trainY = preprocessing.scale(train_data[:,1:]), train_data[:,0]
   testX, testY   = preprocessing.scale(test_data[:,1:]), test_data[:,0]
 
+  k_array = [i for i in range(202) if i % 2 == 1]
+  print(best_k(k_array, trainX, trainY))
+
+  """
   # Train the kNN model and predict on the test data
   k = 101
   model = get_knn_model(k, trainX, trainY)
@@ -115,6 +119,6 @@ def main():
   
   pred_samples = predictor(model, test_samples, True)
   print(pred_samples)
-
+  """
 
 main()
