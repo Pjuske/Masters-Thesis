@@ -101,17 +101,19 @@ def main():
   # Predict win probability for 10 samples selected from test data
   test_samples = preprocessing.scale(
       np.array([
-                 [1  ,  258   ,  338],   # radiant win
-                 [1  , -1852  , -160],   # radiant win
-                 [5  , -4710  , -5938],  # dire win
-                 [5  ,  4     ,  375],   # radiant win
-                 [15 , -15171 ,  4727],  # radiant win
+                 [1  ,  258   ,  338  ], # radiant win
+                 [1  , -1852  , -160  ], # radiant win
+                 [5  , -4710  , -5938 ], # dire win
+                 [5  ,  4     ,  375  ], # radiant win
+                 [15 , -15171 ,  4727 ], # radiant win
                  [25 ,  11074 ,  15811], # radiant win
                  [35 , -23832 , -33072], # dire win
-                 [50 ,  8205  , -3212],  # dire win
-                 [90 , -40707 , -146],   # dire win
-                 [119,  -38876 , 166]    # dire win
-               ] + 0.))                  # (convert from int to float list)
+                 [45 ,  38862 ,  594  ], # radiant win
+                 [50 ,  8205  , -3212 ], # dire win
+                 [75 ,  499   ,  235  ], # radiant win
+                 [90 , -40707 , -146  ], # dire win
+                 [119,  -38876,  166  ]  # dire win
+               ]) + 0.)                  # (convert from int to float list)
   
   pred_samples = predictor(model, test_samples, True)
   print(pred_samples)
