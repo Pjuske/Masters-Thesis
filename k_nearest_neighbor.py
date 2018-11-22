@@ -89,18 +89,32 @@ def main():
   trainX, trainY = preprocessing.scale(train_data[:,1:]), train_data[:,0]
   testX, testY   = preprocessing.scale(test_data[:,1:]), test_data[:,0]
 
-  k_array = [i for i in range(202) if i % 2 == 1]
-  print(best_k(k_array, trainX, trainY))
+  #k_array = [i for i in range(202) if i % 2 == 1]
+  #print(best_k(k_array, trainX, trainY))
 
-  """
+  
   # Train the kNN model and predict on the test data
   k = 101
   model = get_knn_model(k, trainX, trainY)
   preds = predictor(model, testX, False)
-  
+
+  # Get the list of correct and incorrect predictions
+  correctPredictions   = preds[np.where(preds == testY)[0]]
+  incorrectPredictions = preds[np.where(preds != testY)[0]]
+
+  # Calculate the classification-cases the model produced, where positive = win  
+  truePositives  = len(correctPredictions[np.where(correctPredictions == 1)[0]])
+  trueNegatives  = len(correctPredictions[np.where(correctPredictions == 0)[0]])
+  falsePositives = len(correctPredictions[np.where(incorrectPredictions == 1)[0]])
+  falseNegatives = len(correctPredictions[np.where(incorrectPredictions == 0)[0]])
+  print("TP: ", truePositives)
+  print("TN: ", trueNegatives)
+  print("FP: ", falsePositives)
+  print("FN: ", falseNegatives)
+   
   # Calculate and print the test accuracy
   np.set_printoptions(suppress=True)
-  print(classification_accuracy(preds,testY))
+  print("Accuracy: ", (truePositives + trueNegatives) / (truePositives + trueNegatives + falsePositives + falseNegatives))
   
   # Predict win probability for 10 samples selected from test data
   test_samples = preprocessing.scale(
@@ -121,6 +135,6 @@ def main():
   
   pred_samples = predictor(model, test_samples, True)
   print(pred_samples)
-  """
+  
 
 main()
