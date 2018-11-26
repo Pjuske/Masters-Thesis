@@ -1,7 +1,6 @@
 import numpy as np
 import json
 import csv
-import pandas
 
 def CustomParser(data):
     j1 = json.loads(data)
@@ -10,21 +9,17 @@ def CustomParser(data):
 
 
 def main():
-  #data = json.loads('detailed_match_data_final_without_blank_cells.csv') #np.genfromtxt('detailed_match_data_final_without_blank_cells.csv',skip_header=1, delimiter=',')
-  #print(data.shape)
-  
-  columns = ['player0','player1','player2','player3','player4',
-             'player5','player6','player7','player8','player9']
-  
-  feats_wanted = ['hero_id','kills','deaths','assists','hero_healing',
-                  'last_hits','gold_per_min','xp_per_min','tower_damage',
-                  'hero_damage','obs_placed','sen_placed']
+  playerColumns = ['player0','player1','player2','player3','player4',
+                   'player5','player6','player7','player8','player9']
+ 
+  team_feats    = ['radiant_score','dire_score','radiant_gold_adv','radiant_xp_adv']
+  player_feats  = ['hero_id','kills','deaths','assists','hero_healing',
+                   'last_hits','gold_per_min','xp_per_min','tower_damage',
+                   'hero_damage','obs_placed','sen_placed']
 
 
-  
-  
-  # Reads the file the same way that you did
-  csv_file = csv.DictReader(open('detailed_match_data_final_players.csv', 'r'), delimiter=';')
+  # Reads the detaled match data, ignoring those with missing values
+  csv_file = csv.DictReader(open('datasets/2_detailed_match_data_without_blanks.csv', 'r'), delimiter=';')
 
   
   # Created a list and adds the rows to the list
@@ -33,33 +28,37 @@ def main():
       json_list.append(row)
   
   
-  
-  with open("./%s" % ('detailed_player_data.csv'), 'w', newline='',  encoding="utf-8") as outf:
+  with open("./%s" % ('datasets/10_regression_data.csv'), 'w', newline='',  encoding="utf-8") as outf:
     # Write header into csv file    
-    header = feats_wanted
+    header = player_feats + team_feats
     dw = csv.DictWriter(outf, dict.fromkeys(header).keys(), delimiter=',')
     dw.writeheader()
 
     for i in range(len(json_list)):
       if (i % 3000 == 0):
-          print(i, 'iterations done...\n')
+          print(i*10, 'iterations done...\n')
       
       try:
-        for player in columns:
-          row = json_list[i]
+        row = json_list[i]
+        my_dict={}
+        
+        for player in playerColumns:  
+          # Parse player data and add it to dicitonary
           player_data = json.loads(row[player].replace("\'", "\""))
-      
-          my_dict={}
-          for feature in feats_wanted:
+          for feature in player_feats:
             my_dict[feature] = player_data[feature]
             
-      
+          # Add team data to dictionary
+          for feature in team_feats:
+            my_dict[feature] = json.loads(row[feature])  
+          
+          # Write row
           dw.writerow(my_dict)
+            
      
       # Ignore JSONDecodeError
       except ValueError:
         print('Decoding JSON has failed for row ',i)      
-      
-      
+            
 
 main()
