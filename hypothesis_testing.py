@@ -99,8 +99,8 @@ fail_to_reject_values = [gpm_hypotheses[i] for i in np.where(np.array(gpm_hypoth
 xpm_hypotheses = [minhandler(i) for i in xpm_hypotheses]
 gpm_hypotheses = [minhandler(i) for i in gpm_hypotheses]
 
-plt.plot(gpm_hypotheses, label='gpm p-values', linewidth=3.5, color='#53E53C')
-plt.plot(xpm_hypotheses, label='xpm p-values', linewidth=3.0, color='orange')
+plt.plot(gpm_hypotheses, label='H_0 gold p-values', linewidth=3.5, color='#53E53C')
+plt.plot(xpm_hypotheses, label='H_0 exp p-values', linewidth=3.0, color='orange')
 plt.plot([alpha for i in range(len(xpm_hypotheses))], label=('alpha = ' + str(alpha)), color='black')
 plt.scatter(fail_to_reject, fail_to_reject_values, label='Failed to reject hypothesis', color='red')
 plt.title('p-values from hypothesis-testing gold and exp advantage per minute')
@@ -115,8 +115,8 @@ log_fail_to_reject = list(np.where(np.array([math.log(gpm_hypotheses[i]) for i i
 log_fail_to_reject_values = [[math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))][i] for i in np.where(np.array([math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))]) > math.log(alpha))[0]] + [[math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))][i] for i in np.where(np.array([math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))]) > math.log(alpha))[0]]
 
 plt.figure(figsize=(12,6))
-plt.plot([math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))], label='log(gpm p-values)', linewidth=3.5, color='#53E53C')
-plt.plot([math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))], label='log(xpm p-values)', linewidth=3.0, color='orange')
+plt.plot([math.log(gpm_hypotheses[i]) for i in range(len(gpm_hypotheses))], label='log(H_0 gold p-values)', linewidth=3.5, color='#53E53C')
+plt.plot([math.log(xpm_hypotheses[i]) for i in range(len(xpm_hypotheses))], label='log(H_0 exp p-values)', linewidth=3.0, color='orange')
 plt.plot([math.log(alpha) for i in range(len(xpm_hypotheses))], label=('alpha = log(' + str(alpha) + ')'), color='black')
 plt.scatter(log_fail_to_reject, log_fail_to_reject_values, label='Failed to reject hypothesis', color='red')
 plt.title('log(p-values) from hypothesis-testing gold and exp advantage per minute')
