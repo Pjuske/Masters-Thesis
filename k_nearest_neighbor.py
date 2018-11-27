@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
@@ -36,10 +37,11 @@ def best_k(k_array, train_data, train_labels):
   best_accuracy = k_accuracies.index(max(k_accuracies))
   
   # Plot the accuracies for the different k values
-  plt.figure(figsize=(12,7))
+  plt.figure(figsize=(10,5))
   plt.plot(k_array, k_accuracies, '--bo', color='green')
   plt.rc('axes',titlesize=10)
-  plt.xticks(k_array)
+  plt.xticks(np.arange(0,201,10))
+  plt.grid()
   plt.xlabel("k-parameter")
   plt.ylabel("Accuracy score (%)")
   plt.title("Accuracy score for different kNN-classifiers")
@@ -78,24 +80,63 @@ def classification_accuracy(pred_labels, actual_labels):
   accuracy = np.mean(result)  
   return accuracy
   
-
+def radiant_win_probability(model, data):
+  preds = predictor(model, data, True)
+  radiant_probability = [arr[1] for arr in preds]
+  return preds[:,1].flatten()
+  #return radiant_probability
+  
 
 def main():  
+  # k_accuracies = [0.618,0.642,0.654,0.661,0.665,0.668,0.671,0.673,0.674,0.676,0.677,0.678,0.679,0.679,0.680,0.680,0.681,0.682,0.682,0.682,0.683,0.683,0.683,0.684,0.684,0.685,0.684,0.685,0.685,0.686,0.685,0.686,0.686,0.686,0.686,0.686,0.687,0.687,0.687,0.687,0.687,0.688,0.688,0.688,0.688,0.688,0.688,0.688,0.688,0.688,0.689,0.688,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.689,0.690,0.690,0.690,0.689,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.690,0.691,0.691,0.691,0.691,0.691,0.691,0.690,0.691,0.690,0.690,0.690,0.691]
+  
   # Load training and test data
   train_data = np.genfromtxt('data-retriever/datasets/gpmxpm_train_data.csv', delimiter=',')
-  test_data  = np.genfromtxt('data-retriever/datasets/gpmxpm_test_data.csv', delimiter=',')
+  test_data  = np.genfromtxt('data-retriever/datasets/11_knn_two_samples.csv', delimiter=',')
   
   # Split data into features and labels
   trainX, trainY = preprocessing.scale(train_data[:,1:]), train_data[:,0]
   testX, testY   = preprocessing.scale(test_data[:,1:]), test_data[:,0]
 
-  #k_array = [i for i in range(202) if i % 2 == 1]
-  #print(best_k(k_array, trainX, trainY))
-
   
-  # Train the kNN model and predict on the test data
+  k_array = [i for i in range(202) if i % 2 == 1]
+  print(best_k(k_array, trainX, trainY))
+  
+  
+  # Train the kNN model and predict two random samples
   k = 101
   model = get_knn_model(k, trainX, trainY)
+  sample_preds = radiant_win_probability(model,testX)
+  first_game   = sample_preds[:43]
+  second_game  = sample_preds[43:]
+  
+  minutes = [0,5,10,15,20,25,30,35,40]
+  values1 = [first_game[e]*100 for e in minutes]
+  values2 = [second_game[e]*100 for e in minutes]
+  
+  plt.figure(figsize=(14,8))
+  plt.plot(range(43), first_game*100, color='#ffa31a')
+  plt.scatter(minutes,values1, label='Gold/Experience difference', color='grey')
+  plt.axhline(50, color='black')
+  plt.title('Live analysis of game that Radiant team loses', fontsize=15)
+  plt.xlabel('Timestamp (min)', fontsize=15)
+  plt.ylabel('Win probability (%)', fontsize=15)
+  plt.legend()
+  plt.show()
+  
+  plt.figure(figsize=(14,8))
+  plt.plot(range(44), second_game*100, color='#ffa31a')
+  plt.scatter(minutes,values2, label='Gold/Experience difference', color='grey')
+  plt.axhline(50, color='black')
+  plt.title('Live analysis of game that Radiant team wins', fontsize=15)
+  plt.xlabel('Timestamp (min)', fontsize=15)
+  plt.ylabel('Win probability (%)', fontsize=15)
+  plt.legend()
+  plt.show()
+  
+  
+  
+  # Train the kNN model and predict on the test data
   preds = predictor(model, testX, False)
 
   # Get the list of correct and incorrect predictions
@@ -135,6 +176,7 @@ def main():
   
   pred_samples = predictor(model, test_samples, True)
   print(pred_samples)
+  
   
 
 main()
