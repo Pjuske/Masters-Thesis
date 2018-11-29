@@ -66,13 +66,12 @@ def main():
   wantedData     = dataWithRoles[:,wantedFeatures]
   print('\nCorrelation matrix:\n', get_correlation_matrix(wantedData))
   
-  
-  # TODO: split data into clusters before making train/test data
-  """
-  # Split data into training and test set and save to two separate csv files
-  train_data, test_data  = train_test_split(dataWithRoles, test_size=0.2)
-  np.savetxt("datasets/regression_train_data.csv", train_data, delimiter=",",fmt='%i')
-  np.savetxt("datasets/regression_test_data.csv", test_data, delimiter=",",fmt='%i')
-  """
+  # Split the data set into 6 data sets, one for each role  
+  for i in range(1,7):
+    roleSpecificData = dataWithRoles[np.where(dataWithRoles[:,0] == i)[0]]
+    train_data, test_data = train_test_split(roleSpecificData, test_size=0.1)
+    np.savetxt("datasets/regression/regression_train_data_" +str(i) +".csv", train_data, delimiter=",",fmt='%i')
+    np.savetxt("datasets/regression/regression_test_data_"  +str(i) +".csv", test_data, delimiter=",",fmt='%i')
+    
 
 main()
