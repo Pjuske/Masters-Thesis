@@ -1,7 +1,8 @@
 import random
 import numpy as np
-#import seaborn as sns
-#import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import scale
 from sklearn.linear_model import LinearRegression
 
 def predict_weights(X, Y):
@@ -40,17 +41,72 @@ def display_assessment_of_player(model, vector_stats, labels):
 
   return preds
 
+def compute_residuals_and_responses(train_datasets, test_datasets):
+  features        = 15
+  roles           = 6
+  wanted_features = [index for index in range(17) if (index != 0 and index != 12)]
+  
+  all_residuals = []
+  all_responses = []
+  
+  for feat in range(features):
+    residuals = np.array([])
+    responses = np.array([])
+        
+    for role in range(roles):
+      # Train the model
+      train_data = train_datasets[role][:, wanted_features]
+      X          = np.delete(train_data, (feat), axis=1)
+      Y          = train_data[:,feat]
+      model = LinearRegression().fit(X,Y)
+    
+      # Remove the output feature from the test data
+      test_data = np.delete(test_datasets[role], (feat), axis=1)
+      
+      # Get the actual and predicted output and compute the residuals      
+      actual_output    = test_datasets[role][:,feat]
+      predicted_output = model.predict(test_data)
+    
+      rolespecific_residuals = actual_output - predicted_output
+      residuals = np.append(residuals, rolespecific_residuals)
+      responses = np.append(responses, predicted_output)
+      
+    all_residuals.append(residuals)
+    all_responses.append(responses)
+      
+  return all_residuals, all_responses
+
+ 
+def plot_residual_distributions(residuals, feature):
+  min_value = int(np.min(residuals))
+  max_value = int(np.max(residuals))
+  
+  plt.hist(residuals, bins=compute_bin_range(min_value, max_value), color='#cc99ff')
+  plt.title('Distribution of residuals for feature \'' + feature + '\'', fontsize=14)
+  plt.xlabel(feature)
+  plt.ylabel('Frequency')
+  plt.show()
+
+def plot_residuals_vs_predicted_responses(residuals, responses, feature): 
+  plt.scatter(responses, residuals, color='#cc99ff')
+  plt.title('Residuals vs predicted responses for \'' + feature + '\'', fontsize=14)
+  plt.xlabel('responses')
+  plt.ylabel('residuals')
+  plt.show()
+
+
 def get_wins_only(train_data, result_feature):
   return train_data[np.where(train_data[:,result_feature] == 1)[0]]
+
   
-def compute_bin_range(max_value):
+def compute_bin_range(min_value, max_value):
   # Compute step size for bins in histogram
-  if max_value < 1000:
-    return range(0, max_value, 1)
-  elif max_value < 10000:
-    return range(0, max_value, 10)
+  if min_value < 1000 and max_value < 1000:
+    return range(min_value, max_value, 1)
+  elif min_value < 10000 and max_value < 10000:
+    return range(min_value, max_value, 10)
   else:
-    return range(0, max_value, 1000)
+    return range(min_value, max_value, 1000)
 
 
 def main():
@@ -74,18 +130,34 @@ def main():
   labels = ['kills','deaths','assists','hero healing','last hits','gpm','xpm',
             'tower damage','hero damage','observers placed','sentries placed',
             'team score','enemy team score','team gold advantage','team exp advantage']
-
+  
   # Get the classifier model for each role
   roles = 6
-  models = []
+  weights = []
   for i in range(roles):
     # Get only data points of players who won their match
     win_column = 12
     train_data = get_wins_only(train_datasets[i], win_column)[:, wanted_features]
 
     # Perform linear regression
-    model = perform_linear_regression(train_data)
-    models.append(model)
+    weight = perform_linear_regression(train_data)
+    weights.append(weight)
+  
+  # Compute residual and predicted responses for all features
+  all_residuals, all_responses = compute_residuals_and_responses(train_datasets, test_datasets)
+  
+  # Plot the residual distribution for each feature
+  for feat in range(len(wanted_features)):
+    feat_residuals = all_residuals[feat]
+    plot_residual_distributions(feat_residuals, labels[feat])
+  
+  
+  # Plot the standardized residuals versus the standardized predicted responses
+  for feat in range(len(wanted_features)):
+    feat_residuals = all_residuals[feat]
+    responses      = all_responses[feat]
+    plot_residuals_vs_predicted_responses(feat_residuals, responses, labels[feat])
+  
   
   # Display an assessment of a random player from each role
   for i in range(roles):
@@ -95,27 +167,8 @@ def main():
     print('\n----------------------------------------')
     print('Assesment of player', random_player, 'from role', i+1)
     print('----------------------------------------')
-    display_assessment_of_player(models[i], sample_role, labels)
- 
+    display_assessment_of_player(weights[i], sample_role, labels)
   
-  # Plot histogram for each feature to see if they are normal distributed
-  """
-  sns.set()
-  regression_data = np.loadtxt('data-retriever/datasets/10_regression_data.csv', delimiter=',', skiprows=1)[:, wanted_features]
   
-  for i in range(len(wanted_features)):
-    feature_data = regression_data[:,i]
-    #plt.hist(feature_data, bins=range(int(np.min(feature_data)),int(np.max(feature_data))))
-    max_value = int(np.max(feature_data))
-    
-    
-    bin_range = compute_bin_range(max_value)
-    
-    plt.hist(feature_data, bins=bin_range, color='#cc99ff')
-    plt.title('Distribution of feature \'' + labels[i] + '\'')
-    plt.xlabel(labels[i])
-    plt.ylabel('Frequency')
-    plt.show()
-  """
   
 main()
