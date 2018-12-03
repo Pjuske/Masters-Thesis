@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import scale
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 
 def predict_weights(X, Y):
   reg = LinearRegression().fit(X,Y)
@@ -98,7 +99,32 @@ def plot_residuals_vs_predicted_responses(residuals, responses, feature):
 def get_wins_only(train_data, result_feature):
   return train_data[np.where(train_data[:,result_feature] == 1)[0]]
 
+def get_loss_only(train_data, result_feature):
+  return train_data[np.where(train_data[:,result_feature] == 0)[0]]
   
+def computer_r2_score(train_datasets, test_datasets):
+  r2_score_matrix = []
+  wanted_features   = [index for index in range(17) if (index != 0 and index != 12)]
+  for (train_dataset, test_dataset) in zip(train_datasets, test_datasets):
+    train_dataset = get_wins_only(train_dataset, 12)[:,wanted_features]
+    test_dataset = test_dataset[:,wanted_features]
+    r2_score_vector = []
+    for feature in range(15):
+      
+      test_data = np.delete(test_dataset, (feature), axis=1)
+      X = np.delete(train_dataset, (feature), axis=1)
+      Y = train_dataset[:,feature]
+      model = LinearRegression().fit(X,Y)
+      y_True = test_dataset[:,feature]
+      y_Pred = model.predict(test_data)
+      
+      r2_score_vector.append(np.around(r2_score(y_True, y_Pred),2))
+      
+    r2_score_matrix.append(r2_score_vector)
+    
+  for elem in r2_score_matrix:
+    print(elem)
+
 def compute_bin_range(min_value, max_value):
   # Compute step size for bins in histogram
   if min_value < 1000 and max_value < 1000:
@@ -120,13 +146,26 @@ def main():
                       np.loadtxt('data-retriever/datasets/regression/regression_train_data_6.csv', delimiter=',', skiprows=1)]
   
   # Load test data for each role
-  test_datasets    = [np.loadtxt('data-retriever/datasets/regression/regression_test_data_1.csv', delimiter=',', skiprows=1)[:, wanted_features],
-                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_2.csv', delimiter=',', skiprows=1)[:, wanted_features],
-                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_3.csv', delimiter=',', skiprows=1)[:, wanted_features],
-                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_4.csv', delimiter=',', skiprows=1)[:, wanted_features],
-                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_5.csv', delimiter=',', skiprows=1)[:, wanted_features],
-                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_6.csv', delimiter=',', skiprows=1)[:, wanted_features]]
+  test_datasets    = [np.loadtxt('data-retriever/datasets/regression/regression_test_data_1.csv', delimiter=',', skiprows=1),
+                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_2.csv', delimiter=',', skiprows=1),
+                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_3.csv', delimiter=',', skiprows=1),
+                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_4.csv', delimiter=',', skiprows=1),
+                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_5.csv', delimiter=',', skiprows=1),
+                      np.loadtxt('data-retriever/datasets/regression/regression_test_data_6.csv', delimiter=',', skiprows=1)]
   
+  
+  test_datasets_win = [get_wins_only(elem, 12) for elem in test_datasets]
+  
+  test_datasets_loss = [get_loss_only(elem, 12) for elem in test_datasets]
+  
+  #R2 score for winning games
+  computer_r2_score(train_datasets, test_datasets_win)
+  
+  #R2 score for losing games
+  computer_r2_score(train_datasets, test_datasets_loss)
+
+  
+  test_datasets = [elem[:, wanted_features] for elem in test_datasets]
   labels = ['kills','deaths','assists','hero healing','last hits','gpm','xpm',
             'tower damage','hero damage','observers placed','sentries placed',
             'team score','enemy team score','team gold advantage','team exp advantage']
@@ -168,7 +207,6 @@ def main():
     print('Assesment of player', random_player, 'from role', i+1)
     print('----------------------------------------')
     display_assessment_of_player(weights[i], sample_role, labels)
-  
-  
+
   
 main()
