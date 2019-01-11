@@ -1,5 +1,5 @@
 # Masters-Thesis
-Susanne &amp; Bjarke's masters thesis, written between April 2018 and December 2018. The defence were held in Aud 3, HCØ 20th December at 13:00. The event can be found [here](https://di.ku.dk/begivenhedsmappe/begivenheder-2018/msc-thesis-defence-susanne-truong-and-bjarke-kingo-iversen/ "Thesis event").
+Susanne &amp; Bjarke's masters thesis, written between April 2018 and December 2018. The defence were held in Aud 3, HCØ 20th December at 13:00. The event can be found [here](https://di.ku.dk/begivenhedsmappe/begivenheder-2018/msc-thesis-defence-susanne-truong-and-bjarke-kingo-iversen/ "Thesis event"). Datasets used throughout the thesis can be found [here](https://drive.google.com/open?id=1Y70XEGTYEanZQQIzjNagRPLVIqzQaf8e "Datasets").
 
 ### Title: Optimizing Win Probability in Team Sports Using Data Analysis and Machine Learning
 
